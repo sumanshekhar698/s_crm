@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Delete {{ customer_record.first_name }} {{ customer_record.last_name }} (CBV) | S-CRM{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-6">
+
+            {% url 'record' customer_record.pk as fbv_url %}
+            {% include "customers/cbv/_banner.html" %}
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body p-4 text-center">
+
+                    <i class="bi bi-exclamation-octagon-fill display-5 text-danger"></i>
+                    <h2 class="fw-bold mt-2">Delete customer?</h2>
+                    <p class="text-muted">
+                        This permanently removes <strong>{{ customer_record.first_name }} {{ customer_record.last_name }}</strong>
+                        and all of their notes. This cannot be undone.
+                    </p>
+
+                    <form method="post" class="d-flex justify-content-center gap-2 mt-4">
+                        {% csrf_token %}
+                        <a href="{% url 'cbv:detail' customer_record.pk %}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-danger px-4">
+                            <i class="bi bi-trash3 me-1"></i>Yes, delete
+                        </button>
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

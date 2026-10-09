@@ -23,5 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls')),  # login/logout links on the browsable API
+    path('cbv/', include('customers.cbv_urls')),  # class-based version of the customer pages
     path('', include('customers.urls')),#s called URLconf modularization: each Django app owns its own URLs.
 ]
