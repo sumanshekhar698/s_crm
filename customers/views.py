@@ -4,6 +4,7 @@ from django.contrib.auth import logout as auth_logout
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db.models import Q
 from django.utils.http import url_has_allowed_host_and_scheme
 from .forms import SignUpForm, AddRecordForm
 from .models import Record
@@ -17,7 +18,19 @@ def home(request):
 @login_required
 def customers(request):
     records = Record.objects.all()
-    return render(request, 'customers/dashboard.html', {'records': records})
+
+    query = request.GET.get('q', '').strip()
+    if query:
+        # Q objects combine conditions with | (OR); icontains is a case-insensitive "contains"
+        records = records.filter(
+            Q(first_name__icontains=query)
+            | Q(last_name__icontains=query)
+            | Q(email__icontains=query)
+            | Q(phone__icontains=query)
+            | Q(city__icontains=query)
+        )
+
+    return render(request, 'customers/dashboard.html', {'records': records, 'query': query})
 
 
 def login_view(request):

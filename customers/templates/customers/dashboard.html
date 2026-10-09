@@ -28,15 +28,29 @@
     <div class="card shadow-sm border-0">
 
         <div class="card-header bg-body py-3">
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
 
-                <h5 class="mb-0 fw-bold">
-                    Customer List
-                </h5>
+                <div class="d-flex align-items-center gap-2">
+                    <h5 class="mb-0 fw-bold">
+                        Customer List
+                    </h5>
+                    <span class="badge bg-secondary">
+                        {{ records|length }} Customer{{ records|length|pluralize }}
+                    </span>
+                </div>
 
-                <span class="badge bg-secondary">
-                    {{ records|length }} Customer{{ records|length|pluralize }}
-                </span>
+                <!-- Search -->
+                <form method="get" action="{% url 'customers_home' %}" class="d-flex gap-2" role="search">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="search" name="q" value="{{ query }}" class="form-control"
+                               placeholder="Search name, email, phone, city" aria-label="Search customers">
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-primary">Search</button>
+                    {% if query %}
+                    <a href="{% url 'customers_home' %}" class="btn btn-sm btn-outline-secondary text-nowrap">Clear</a>
+                    {% endif %}
+                </form>
 
             </div>
         </div>
@@ -119,7 +133,11 @@
                     {% empty %}
                     <tr>
                         <td colspan="7" class="text-center text-muted py-5">
-                            No customers yet.
+                            {% if query %}
+                                No customers match "{{ query }}".
+                            {% else %}
+                                No customers yet.
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
