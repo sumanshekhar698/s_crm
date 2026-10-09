@@ -1,4 +1,4 @@
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm, UserCreationForm
 from django.contrib.auth.models import User
 from django import forms
 from .models import Note, Record
@@ -94,6 +94,29 @@ class AddRecordForm(forms.ModelForm):
 			if name in self.fields:
 				css = self.fields[name].widget.attrs.get('class', '')
 				self.fields[name].widget.attrs['class'] = f'{css} is-invalid'.strip()
+
+
+class BootstrapFormMixin:
+	"""Adds Bootstrap classes to every field, and is-invalid to fields with errors."""
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		for field in self.fields.values():
+			field.widget.attrs.setdefault('class', 'form-control')
+
+	def full_clean(self):
+		super().full_clean()
+		for name in self.errors:
+			if name in self.fields:
+				self.fields[name].widget.attrs['class'] += ' is-invalid'
+
+
+class StyledPasswordResetForm(BootstrapFormMixin, PasswordResetForm):
+	pass
+
+
+class StyledSetPasswordForm(BootstrapFormMixin, SetPasswordForm):
+	pass
 
 
 class CsvImportForm(forms.Form):
