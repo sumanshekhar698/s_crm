@@ -10,8 +10,8 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
-from .forms import SignUpForm, AddRecordForm
-from .models import Record
+from .forms import SignUpForm, AddRecordForm, NoteForm
+from .models import Note, Record
 
 
 SORT_FIELDS = {
@@ -160,7 +160,39 @@ def logout_view(request):
 def customer_record(request, pk):
     # Looking up inside visible_records() turns "someone else's customer" into a plain 404
     customer_record = get_object_or_404(visible_records(request.user), pk=pk)
-    return render(request, 'customers/record.html', {'customer_record': customer_record})
+    return render(request, 'customers/record.html', {
+        'customer_record': customer_record,
+        'notes': customer_record.notes.select_related('author'),
+        'note_form': NoteForm(),
+    })
+
+
+@login_required
+def add_note(request, pk):
+    customer_record = get_object_or_404(visible_records(request.user), pk=pk)
+    if request.method != 'POST':
+        return redirect('record', pk=pk)
+
+    form = NoteForm(request.POST)
+    if form.is_valid():
+        note = form.save(commit=False)
+        note.record = customer_record
+        note.author = request.user
+        note.save()
+        messages.success(request, "Note added.")
+    else:
+        messages.error(request, "A note can't be empty.")
+    return redirect('record', pk=pk)
+
+
+@login_required
+def delete_note(request, pk):
+    # The note must belong to a customer this user can see
+    note = get_object_or_404(Note, pk=pk, record__in=visible_records(request.user))
+    if request.method == 'POST':
+        note.delete()
+        messages.success(request, "Note deleted.")
+    return redirect('record', pk=note.record_id)
 
 
 @login_required

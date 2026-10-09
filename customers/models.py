@@ -31,3 +31,17 @@ class Record(models.Model):
 
 	def __str__(self):
 		return(f"{self.first_name} {self.last_name}")
+
+
+class Note(models.Model):
+	# related_name='notes' lets us write record.notes.all() instead of record.note_set.all()
+	record = models.ForeignKey(Record, on_delete=models.CASCADE, related_name='notes')
+	author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+	body = models.TextField()
+	created_at = models.DateTimeField(auto_now_add=True)
+
+	class Meta:
+		ordering = ['-created_at', '-pk']
+
+	def __str__(self):
+		return f"Note on {self.record} ({self.created_at:%Y-%m-%d})"

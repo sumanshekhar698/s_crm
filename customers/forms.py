@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django import forms
-from .models import Record
+from .models import Note, Record
 
 class SignUpForm(UserCreationForm):
 	first_name = forms.CharField(label="First name", max_length=100)
@@ -94,3 +94,18 @@ class AddRecordForm(forms.ModelForm):
 			if name in self.fields:
 				css = self.fields[name].widget.attrs.get('class', '')
 				self.fields[name].widget.attrs['class'] = f'{css} is-invalid'.strip()
+
+
+class NoteForm(forms.ModelForm):
+
+	class Meta:
+		model = Note
+		fields = ('body',)
+		labels = {'body': 'Add a note'}
+		widgets = {
+			'body': forms.Textarea(attrs={
+				'class': 'form-control',
+				'rows': 3,
+				'placeholder': 'e.g. Called today, interested in the premium plan',
+			}),
+		}

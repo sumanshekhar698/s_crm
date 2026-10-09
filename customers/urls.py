@@ -30,4 +30,7 @@ urlpatterns = [
   path('delete_record/<int:pk>/', views.delete_record, name='delete_record'),
   path('add_record/', views.add_record, name='add_record'),
   path('update_record/<int:pk>/', views.update_record, name='update_record'),
+
+  path('record/<int:pk>/notes/add/', views.add_note, name='add_note'),
+  path('notes/<int:pk>/delete/', views.delete_note, name='delete_note'),
 ]
