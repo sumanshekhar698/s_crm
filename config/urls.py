@@ -17,7 +17,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from customers.api import router
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/', include(router.urls)),
+    path('api-auth/', include('rest_framework.urls')),  # login/logout links on the browsable API
     path('', include('customers.urls')),#s called URLconf modularization: each Django app owns its own URLs.
 ]
