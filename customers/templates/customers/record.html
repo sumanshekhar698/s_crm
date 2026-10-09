@@ -26,6 +26,7 @@
                         </h2>
                         <div class="small text-body-secondary">
                             Customer #{{ customer_record.pk }} &middot; Added {{ customer_record.created_at|date:"M d, Y" }}
+                            {% if customer_record.owner %}&middot; Owner: {{ customer_record.owner.username }}{% endif %}
                         </div>
                     </div>
                 </div>

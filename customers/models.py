@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 # Create your models here.
@@ -19,6 +20,14 @@ class Record(models.Model):
 	state =  models.CharField(max_length=50)
 	zipcode =  models.CharField(max_length=20)
 	status = models.CharField(max_length=10, choices=Status.choices, default=Status.LEAD)
+	# null=True lets rows that existed before this field was added be migrated, then filled in by 0004
+	owner = models.ForeignKey(
+		settings.AUTH_USER_MODEL,
+		on_delete=models.CASCADE,
+		related_name='records',
+		null=True,
+		blank=True,
+	)
 
 	def __str__(self):
 		return(f"{self.first_name} {self.last_name}")

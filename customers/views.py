@@ -24,10 +24,17 @@ SORT_FIELDS = {
 PER_PAGE = 10
 
 
+def visible_records(user):
+    """Superusers see every customer; everyone else only sees the customers they own."""
+    if user.is_superuser:
+        return Record.objects.all()
+    return Record.objects.filter(owner=user)
+
+
 def home(request):
     context = {}
     if request.user.is_authenticated:
-        context['stats'] = customer_stats(Record.objects.all())
+        context['stats'] = customer_stats(visible_records(request.user))
     return render(request, 'home.html', context)
 
 
@@ -45,8 +52,8 @@ def customer_stats(records):
         'today': records.filter(created_at__gte=today_start).count(),
         'this_week': records.filter(created_at__gte=now - timedelta(days=7)).count(),
         'this_month': this_month,
-        # None means "no data last month", so the template can hide the growth badge
         'by_status': {value: records.filter(status=value).count() for value in Record.Status.values},
+        # None means "no data last month", so the template can hide the growth badge
         'growth': round((this_month - last_month) / last_month * 100, 1) if last_month else None,
         'recent': records.order_by('-created_at', '-pk')[:3],
     }
@@ -55,7 +62,7 @@ def customer_stats(records):
 # @login_required sends logged-out visitors to settings.LOGIN_URL with ?next=<this page>
 @login_required
 def customers(request):
-    records = Record.objects.all()
+    records = visible_records(request.user)
 
     query = request.GET.get('q', '').strip()
     if query:
@@ -151,13 +158,14 @@ def logout_view(request):
 
 @login_required
 def customer_record(request, pk):
-    customer_record = get_object_or_404(Record, pk=pk)
+    # Looking up inside visible_records() turns "someone else's customer" into a plain 404
+    customer_record = get_object_or_404(visible_records(request.user), pk=pk)
     return render(request, 'customers/record.html', {'customer_record': customer_record})
 
 
 @login_required
 def delete_record(request, pk):
-    record = get_object_or_404(Record, pk=pk)
+    record = get_object_or_404(visible_records(request.user), pk=pk)
 
     # Deleting only on POST stops a plain link, prefetch or another site from removing data
     if request.method != 'POST':
@@ -173,7 +181,10 @@ def delete_record(request, pk):
 def add_record(request):
     form = AddRecordForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
-        record = form.save()
+        # commit=False builds the object without saving, so we can set fields the form doesn't show
+        record = form.save(commit=False)
+        record.owner = request.user
+        record.save()
         messages.success(request, f"{record.first_name} {record.last_name} has been added.")
         return redirect('record', pk=record.pk)
 
@@ -182,7 +193,7 @@ def add_record(request):
 
 @login_required
 def update_record(request, pk):
-    current_record = get_object_or_404(Record, pk=pk)
+    current_record = get_object_or_404(visible_records(request.user), pk=pk)
     form = AddRecordForm(request.POST or None, instance=current_record)
     if request.method == 'POST' and form.is_valid():
         form.save()
