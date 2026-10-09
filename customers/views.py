@@ -10,6 +10,14 @@ from .forms import SignUpForm, AddRecordForm
 from .models import Record
 
 
+SORT_FIELDS = {
+    'name': ('first_name', 'last_name'),
+    'email': ('email',),
+    'city': ('city',),
+    'created': ('created_at', 'pk'),
+}
+
+
 def home(request):
     return render(request, 'home.html')
 
@@ -30,7 +38,14 @@ def customers(request):
             | Q(city__icontains=query)
         )
 
-    return render(request, 'customers/dashboard.html', {'records': records, 'query': query})
+    # Only whitelisted keys reach order_by(), so the URL can't sort by arbitrary fields
+    sort = request.GET.get('sort', '-created')
+    if sort.lstrip('-') not in SORT_FIELDS:
+        sort = '-created'
+    direction = '-' if sort.startswith('-') else ''
+    records = records.order_by(*[direction + field for field in SORT_FIELDS[sort.lstrip('-')]])
+
+    return render(request, 'customers/dashboard.html', {'records': records, 'query': query, 'sort': sort})
 
 
 def login_view(request):

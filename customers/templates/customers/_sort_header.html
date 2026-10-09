@@ -1,0 +1,13 @@
+<th scope="col">
+    <a href="?{% if query %}q={{ query|urlencode }}&{% endif %}sort={% if sort == key %}-{% endif %}{{ key }}"
+       class="text-reset text-decoration-none d-inline-flex align-items-center gap-1">
+        {{ label }}
+        {% if sort == key %}
+            <i class="bi bi-caret-up-fill"></i>
+        {% elif sort|slice:"1:" == key and sort|first == "-" %}
+            <i class="bi bi-caret-down-fill"></i>
+        {% else %}
+            <i class="bi bi-chevron-expand opacity-50"></i>
+        {% endif %}
+    </a>
+</th>
