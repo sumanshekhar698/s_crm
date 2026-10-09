@@ -1,5 +1,8 @@
+import csv
+import io
 from datetime import timedelta
 
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
@@ -10,7 +13,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
-from .forms import SignUpForm, AddRecordForm, NoteForm
+from .forms import SignUpForm, AddRecordForm, NoteForm, CsvImportForm
 from .models import Note, Record
 
 
@@ -22,6 +25,9 @@ SORT_FIELDS = {
 }
 
 PER_PAGE = 10
+
+CSV_COLUMNS = ['first_name', 'last_name', 'email', 'phone', 'address', 'city', 'state', 'zipcode', 'status']
+CSV_REQUIRED = ['first_name', 'last_name', 'email']
 
 
 def visible_records(user):
@@ -60,20 +66,23 @@ def customer_stats(records):
 
 
 # @login_required sends logged-out visitors to settings.LOGIN_URL with ?next=<this page>
+def search_records(records, query):
+    if not query:
+        return records
+    # Q objects combine conditions with | (OR); icontains is a case-insensitive "contains"
+    return records.filter(
+        Q(first_name__icontains=query)
+        | Q(last_name__icontains=query)
+        | Q(email__icontains=query)
+        | Q(phone__icontains=query)
+        | Q(city__icontains=query)
+    )
+
+
 @login_required
 def customers(request):
-    records = visible_records(request.user)
-
     query = request.GET.get('q', '').strip()
-    if query:
-        # Q objects combine conditions with | (OR); icontains is a case-insensitive "contains"
-        records = records.filter(
-            Q(first_name__icontains=query)
-            | Q(last_name__icontains=query)
-            | Q(email__icontains=query)
-            | Q(phone__icontains=query)
-            | Q(city__icontains=query)
-        )
+    records = search_records(visible_records(request.user), query)
 
     # Count each status within the current search, before the status filter narrows it down
     status_counts = dict(records.values_list('status').annotate(n=Count('pk')))
@@ -103,6 +112,68 @@ def customers(request):
         'sort': sort,
         'status': status,
         'status_tabs': status_tabs,
+    })
+
+
+@login_required
+def export_csv(request):
+    records = search_records(visible_records(request.user), request.GET.get('q', '').strip())
+    status = request.GET.get('status', '')
+    if status in Record.Status.values:
+        records = records.filter(status=status)
+
+    # Content-Disposition: attachment tells the browser to download instead of displaying
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = f'attachment; filename="customers-{timezone.localdate():%Y-%m-%d}.csv"'
+    response.write('\ufeff')  # BOM so Excel opens UTF-8 names correctly
+
+    writer = csv.writer(response)
+    writer.writerow(CSV_COLUMNS + ['created_at'])
+    for record in records.order_by('pk'):
+        writer.writerow([getattr(record, column) for column in CSV_COLUMNS] + [record.created_at.isoformat()])
+    return response
+
+
+@login_required
+def import_csv(request):
+    form = CsvImportForm(request.POST or None, request.FILES or None)
+    created, errors = 0, []
+
+    if request.method == 'POST' and form.is_valid():
+        # utf-8-sig also accepts files saved by Excel, which start with a BOM
+        text = io.TextIOWrapper(form.cleaned_data['file'], encoding='utf-8-sig')
+        reader = csv.DictReader(text)
+
+        missing = [column for column in CSV_REQUIRED if column not in (reader.fieldnames or [])]
+        if missing:
+            errors.append((1, f"Missing column(s): {', '.join(missing)}"))
+        else:
+            # Row 1 is the header, so data starts at line 2
+            for line, row in enumerate(reader, start=2):
+                data = {column: (row.get(column) or '').strip() for column in CSV_COLUMNS}
+                data['status'] = data['status'].lower() or Record.Status.LEAD
+
+                # Reuse the same form as the Add page, so imported rows follow the same rules
+                row_form = AddRecordForm(data)
+                if row_form.is_valid():
+                    record = row_form.save(commit=False)
+                    record.owner = request.user
+                    record.save()
+                    created += 1
+                else:
+                    problems = '; '.join(f"{field}: {' '.join(msgs)}" for field, msgs in row_form.errors.items())
+                    errors.append((line, problems))
+
+        if created:
+            messages.success(request, f"Imported {created} customer{'s' if created != 1 else ''}.")
+        if not errors:
+            return redirect('customers_home')
+
+    return render(request, 'customers/import.html', {
+        'form': form,
+        'created': created,
+        'errors': errors,
+        'columns': CSV_COLUMNS,
     })
 
 

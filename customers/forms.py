@@ -96,6 +96,28 @@ class AddRecordForm(forms.ModelForm):
 				self.fields[name].widget.attrs['class'] = f'{css} is-invalid'.strip()
 
 
+class CsvImportForm(forms.Form):
+	MAX_SIZE = 1024 * 1024  # 1 MB
+
+	file = forms.FileField(
+		label="CSV file",
+		widget=forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': '.csv'}),
+	)
+
+	def clean_file(self):
+		file = self.cleaned_data['file']
+		if not file.name.lower().endswith('.csv'):
+			raise forms.ValidationError("Please upload a .csv file.")
+		if file.size > self.MAX_SIZE:
+			raise forms.ValidationError("The file is too large (max 1 MB).")
+		return file
+
+	def full_clean(self):
+		super().full_clean()
+		if 'file' in self.errors:
+			self.fields['file'].widget.attrs['class'] += ' is-invalid'
+
+
 class NoteForm(forms.ModelForm):
 
 	class Meta:

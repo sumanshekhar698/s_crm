@@ -21,6 +21,8 @@ from . import views
 urlpatterns = [
     # path('',views.home,name='home'),# it means that when the user visits the root URL, the home function in the views.py file will be called.
   path('customers/',views.customers, name='customers_home'),# it means that when the user visits the customers URL, the home function in the views.py file will be called.
+  path('customers/export/', views.export_csv, name='export_csv'),
+  path('customers/import/', views.import_csv, name='import_csv'),
   path('',views.home, name='home'),
   path('login/', views.login_view, name='login'),
   path('signup/', views.signup_view, name='signup'),
