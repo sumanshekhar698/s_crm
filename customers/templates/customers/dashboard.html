@@ -35,7 +35,7 @@
                         Customer List
                     </h5>
                     <span class="badge bg-secondary">
-                        {{ records|length }} Customer{{ records|length|pluralize }}
+                        {{ page_obj.paginator.count }} Customer{{ page_obj.paginator.count|pluralize }}
                     </span>
                 </div>
 
@@ -76,9 +76,9 @@
 
                 <tbody>
 
-                    {% for record in records %}
+                    {% for record in page_obj %}
                     <tr>
-                        <td>{{ forloop.counter }}</td>
+                        <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
 
                         <td>
                             <a href="{% url 'record' record.pk %}" class="fw-semibold text-body text-decoration-none">
@@ -148,6 +148,41 @@
             </table>
 
         </div>
+
+        {% if page_obj.paginator.num_pages > 1 %}
+        <!-- Pagination -->
+        <div class="card-footer bg-body d-flex flex-wrap justify-content-between align-items-center gap-2 py-3">
+
+            <span class="small text-body-secondary">
+                Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }}
+            </span>
+
+            <nav aria-label="Customer pages">
+                <ul class="pagination pagination-sm mb-0">
+
+                    <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+                        <a class="page-link" href="{% if page_obj.has_previous %}?{% if query %}q={{ query|urlencode }}&{% endif %}sort={{ sort }}&page={{ page_obj.previous_page_number }}{% else %}#{% endif %}" aria-label="Previous">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+
+                    {% for number in page_obj.paginator.page_range %}
+                    <li class="page-item {% if number == page_obj.number %}active{% endif %}">
+                        <a class="page-link" href="?{% if query %}q={{ query|urlencode }}&{% endif %}sort={{ sort }}&page={{ number }}">{{ number }}</a>
+                    </li>
+                    {% endfor %}
+
+                    <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+                        <a class="page-link" href="{% if page_obj.has_next %}?{% if query %}q={{ query|urlencode }}&{% endif %}sort={{ sort }}&page={{ page_obj.next_page_number }}{% else %}#{% endif %}" aria-label="Next">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+
+                </ul>
+            </nav>
+
+        </div>
+        {% endif %}
 
     </div>
 

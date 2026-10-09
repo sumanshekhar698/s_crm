@@ -4,6 +4,7 @@ from django.contrib.auth import logout as auth_logout
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.core.paginator import Paginator
 from django.db.models import Q
 from django.utils.http import url_has_allowed_host_and_scheme
 from .forms import SignUpForm, AddRecordForm
@@ -16,6 +17,8 @@ SORT_FIELDS = {
     'city': ('city',),
     'created': ('created_at', 'pk'),
 }
+
+PER_PAGE = 10
 
 
 def home(request):
@@ -45,7 +48,10 @@ def customers(request):
     direction = '-' if sort.startswith('-') else ''
     records = records.order_by(*[direction + field for field in SORT_FIELDS[sort.lstrip('-')]])
 
-    return render(request, 'customers/dashboard.html', {'records': records, 'query': query, 'sort': sort})
+    # get_page() handles missing, non-numeric and out-of-range page numbers for us
+    page_obj = Paginator(records, PER_PAGE).get_page(request.GET.get('page'))
+
+    return render(request, 'customers/dashboard.html', {'page_obj': page_obj, 'query': query, 'sort': sort})
 
 
 def login_view(request):
