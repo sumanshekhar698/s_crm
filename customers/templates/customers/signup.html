@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Sign up | S-CRM{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="row justify-content-center align-items-center py-5"
+         style="min-height: 80vh;">
+
+        <div class="col-md-8 col-lg-6 col-xl-5">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body p-4">
+
+                    <!-- Logo / Title -->
+                    <div class="text-center mb-4">
+
+                        <h2 class="fw-bold">
+                            S-CRM
+                        </h2>
+
+                        <p class="text-muted mb-0">
+                            Create your account
+                        </p>
+
+                    </div>
+
+
+                    <!-- Form-wide errors -->
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger small">
+                        {% for error in form.non_field_errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+
+                    <!-- Sign up Form -->
+                    <form method="post" action="{% url 'signup' %}" novalidate>
+
+                        {% csrf_token %}
+
+                        <!-- Fields: names side by side, the rest full width -->
+                        <div class="row g-3">
+                            {% for field in form %}
+                            <div class="{% if field.name == 'first_name' or field.name == 'last_name' %}col-sm-6{% else %}col-12{% endif %}">
+                                <label for="{{ field.id_for_label }}" class="form-label">
+                                    {{ field.label }}
+                                </label>
+                                {{ field }}
+                                {% for error in field.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                                {% if field.help_text and not field.errors %}
+                                    <div class="form-text">{{ field.help_text }}</div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+
+
+                        <!-- Sign up Button -->
+                        <div class="d-grid mt-4">
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary btn-lg">
+                                Create account
+                            </button>
+
+                        </div>
+
+                    </form>
+
+
+                    <!-- Login link -->
+                    <div class="text-center mt-4">
+
+                        <span class="text-muted">Already have an account?</span>
+                        <a href="{% url 'login' %}" class="text-decoration-none">
+                            Log in
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

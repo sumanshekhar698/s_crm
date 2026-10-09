@@ -1,0 +1,11 @@
+[project]
+name = "crm-django"
+version = "0.1.0"
+description = "A customer relationship management (CRM) application built with Django and MySQL."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "django>=6.1.2",
+    "mysqlclient>=2.3.0",
+    "python-dotenv>=1.2.4",
+]

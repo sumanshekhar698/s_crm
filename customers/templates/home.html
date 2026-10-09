@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+
+{% block title %}
+S-CRM | Customer Relationship Management
+{% endblock %}
+
+
+{% block content %}
+
+{% now "H" as hour %}
+
+<!-- Hero Section -->
+<section class="bg-primary-subtle bg-gradient text-body-emphasis border-bottom border-primary-subtle">
+    <div class="container py-5">
+        <div class="row align-items-center g-5 py-lg-5">
+
+            <!-- Left: greeting + pitch -->
+            <div class="col-lg-7">
+
+                <div class="d-inline-flex align-items-center gap-2 bg-body shadow-sm border rounded-pill px-3 py-2 mb-4">
+                    {% if hour < "12" %}
+                        <i class="bi bi-sunrise-fill text-warning"></i>
+                        <span class="small">Good morning{% if user.is_authenticated %}, {{ user.username }}{% endif %}!</span>
+                    {% elif hour < "17" %}
+                        <i class="bi bi-sun-fill text-warning"></i>
+                        <span class="small">Good afternoon{% if user.is_authenticated %}, {{ user.username }}{% endif %}!</span>
+                    {% else %}
+                        <i class="bi bi-moon-stars-fill text-info"></i>
+                        <span class="small">Good evening{% if user.is_authenticated %}, {{ user.username }}{% endif %}!</span>
+                    {% endif %}
+                </div>
+
+                <h1 class="display-4 fw-bold lh-sm mb-4">
+                    Manage your customers.<br>
+                    <span class="text-primary">Grow your business.</span>
+                </h1>
+
+                <p class="lead text-body-secondary mb-4 col-xl-10">
+                    {% if user.is_authenticated %}
+                        Welcome back! Your customer list, recent activity and
+                        insights are ready when you are.
+                    {% else %}
+                        S-CRM keeps every customer, conversation and deal in one
+                        place, so you can spend less time searching and more time selling.
+                    {% endif %}
+                </p>
+
+                <div class="d-flex flex-wrap gap-3 mb-5">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'customers_home' %}" class="btn btn-primary btn-lg px-4">
+                            <i class="bi bi-grid-1x2-fill me-2"></i>Open Dashboard
+                        </a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-primary btn-lg px-4">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Get Started
+                        </a>
+                    {% endif %}
+                    <a href="#features" class="btn btn-outline-primary btn-lg px-4">
+                        <i class="bi bi-stars me-2"></i>Explore Features
+                    </a>
+                </div>
+
+                <div class="row g-4 text-center text-sm-start">
+                    <div class="col-4">
+                        <div class="fs-3 fw-bold">10k+</div>
+                        <div class="small text-body-secondary">Contacts managed</div>
+                    </div>
+                    <div class="col-4 border-start border-primary-subtle">
+                        <div class="fs-3 fw-bold">99.9%</div>
+                        <div class="small text-body-secondary">Uptime</div>
+                    </div>
+                    <div class="col-4 border-start border-primary-subtle">
+                        <div class="fs-3 fw-bold">4.9 <i class="bi bi-star-fill text-warning fs-5"></i></div>
+                        <div class="small text-body-secondary">User rating</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right: dashboard widget (sample data) -->
+            <div class="col-lg-5">
+
+                <div class="card border-0 shadow-lg rounded-4">
+
+                    <div class="card-header bg-body border-0 rounded-top-4 pt-4 px-4 d-flex justify-content-between align-items-center">
+                        <div class="fw-bold">
+                            <i class="bi bi-bar-chart-fill text-primary me-2"></i>Overview
+                        </div>
+                        <span class="badge bg-body-tertiary text-body border">
+                            <i class="bi bi-calendar3 me-1"></i>This month
+                        </span>
+                    </div>
+
+                    <div class="card-body px-4">
+
+                        <div class="d-flex justify-content-between align-items-end mb-2">
+                            <div>
+                                <div class="small text-muted">Total Customers</div>
+                                <div class="display-6 fw-bold">1,248</div>
+                            </div>
+                            <span class="badge bg-success-subtle text-success-emphasis rounded-pill px-3 py-2">
+                                <i class="bi bi-graph-up-arrow me-1"></i>+12.5%
+                            </span>
+                        </div>
+
+                        <div class="progress mb-1" role="progressbar" aria-label="Monthly goal" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                            <div class="progress-bar bg-primary w-75"></div>
+                        </div>
+                        <div class="small text-muted mb-4">75% of monthly goal</div>
+
+                        <div class="row g-2 text-center mb-4">
+                            <div class="col-4">
+                                <div class="bg-success-subtle rounded-3 py-3">
+                                    <i class="bi bi-person-check-fill text-success fs-5"></i>
+                                    <div class="fw-bold">842</div>
+                                    <div class="small text-muted">Active</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-primary-subtle rounded-3 py-3">
+                                    <i class="bi bi-person-plus-fill text-primary fs-5"></i>
+                                    <div class="fw-bold">286</div>
+                                    <div class="small text-muted">Leads</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-secondary-subtle rounded-3 py-3">
+                                    <i class="bi bi-person-dash-fill text-secondary fs-5"></i>
+                                    <div class="fw-bold">120</div>
+                                    <div class="small text-muted">Inactive</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="fw-semibold small text-uppercase text-muted">Recent customers</div>
+                            <i class="bi bi-three-dots text-muted"></i>
+                        </div>
+
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item px-0 d-flex align-items-center gap-3">
+                                <i class="bi bi-person-circle fs-3 text-primary"></i>
+                                <div class="flex-grow-1">
+                                    <div class="fw-semibold">Priya Sharma</div>
+                                    <div class="small text-muted">Bengaluru, KA</div>
+                                </div>
+                                <span class="badge bg-success-subtle text-success-emphasis">Active</span>
+                            </li>
+                            <li class="list-group-item px-0 d-flex align-items-center gap-3">
+                                <i class="bi bi-person-circle fs-3 text-warning"></i>
+                                <div class="flex-grow-1">
+                                    <div class="fw-semibold">Arjun Mehta</div>
+                                    <div class="small text-muted">Mumbai, MH</div>
+                                </div>
+                                <span class="badge bg-primary-subtle text-primary-emphasis">Lead</span>
+                            </li>
+                            <li class="list-group-item px-0 d-flex align-items-center gap-3">
+                                <i class="bi bi-person-circle fs-3 text-info"></i>
+                                <div class="flex-grow-1">
+                                    <div class="fw-semibold">Sara Khan</div>
+                                    <div class="small text-muted">Delhi, DL</div>
+                                </div>
+                                <span class="badge bg-success-subtle text-success-emphasis">Active</span>
+                            </li>
+                        </ul>
+
+                    </div>
+
+                    <div class="card-footer bg-body-tertiary border-0 rounded-bottom-4 px-4 py-3 small text-muted">
+                        <i class="bi bi-clock-history me-1"></i>Updated 5 minutes ago
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- Features -->
+<section id="features" class="py-5 bg-body-tertiary">
+    <div class="container py-5">
+
+        <div class="text-center mb-5">
+            <span class="badge bg-primary-subtle text-primary-emphasis rounded-pill px-3 py-2 mb-3">
+                <i class="bi bi-lightning-charge-fill me-1"></i>FEATURES
+            </span>
+            <h2 class="fw-bold">Everything you need to manage customers</h2>
+            <p class="text-muted col-lg-6 mx-auto">
+                Keep your customer information organized, searchable and always up to date.
+            </p>
+        </div>
+
+        <div class="row g-4">
+
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <div class="bg-primary-subtle text-primary rounded-3 d-inline-flex p-3 mb-3">
+                            <i class="bi bi-people-fill fs-4"></i>
+                        </div>
+                        <h5 class="fw-bold">Customer Records</h5>
+                        <p class="text-muted mb-0">
+                            Store contact details, addresses and notes in one central place.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <div class="bg-success-subtle text-success rounded-3 d-inline-flex p-3 mb-3">
+                            <i class="bi bi-activity fs-4"></i>
+                        </div>
+                        <h5 class="fw-bold">99.9% Uptime SLA</h5>
+                        <p class="text-muted mb-0">
+                            Your customer data is always available when you need it.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <div class="bg-warning-subtle text-warning-emphasis rounded-3 d-inline-flex p-3 mb-3">
+                            <i class="bi bi-lightning-fill fs-4"></i>
+                        </div>
+                        <h5 class="fw-bold">Simple &amp; Fast</h5>
+                        <p class="text-muted mb-0">
+                            A clean interface that gets out of your way.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <div class="bg-danger-subtle text-danger rounded-3 d-inline-flex p-3 mb-3">
+                            <i class="bi bi-shield-lock-fill fs-4"></i>
+                        </div>
+                        <h5 class="fw-bold">Secure Access</h5>
+                        <p class="text-muted mb-0">
+                            Only signed-in users can view and manage customer data.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+
+<!-- CTA -->
+<section class="py-5">
+    <div class="container py-4">
+        <div class="bg-success bg-gradient text-white rounded-4 shadow p-5 text-center">
+            <i class="bi bi-rocket-takeoff-fill display-5 mb-3 d-block"></i>
+            <h2 class="fw-bold">Ready to manage your customers?</h2>
+            <p class="text-white-50 mb-4">Start exploring your customer data today.</p>
+            <a href="{% url 'customers_home' %}" class="btn btn-light btn-lg px-4 fw-semibold">
+                Go to Customers <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+
+{% endblock %}
