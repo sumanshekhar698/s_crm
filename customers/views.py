@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
@@ -6,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from .forms import SignUpForm, AddRecordForm
 from .models import Record
@@ -22,7 +25,30 @@ PER_PAGE = 10
 
 
 def home(request):
-    return render(request, 'home.html')
+    context = {}
+    if request.user.is_authenticated:
+        context['stats'] = customer_stats(Record.objects.all())
+    return render(request, 'home.html', context)
+
+
+def customer_stats(records):
+    now = timezone.now()
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    month_start = today_start.replace(day=1)
+    last_month_start = (month_start - timedelta(days=1)).replace(day=1)
+
+    this_month = records.filter(created_at__gte=month_start).count()
+    last_month = records.filter(created_at__gte=last_month_start, created_at__lt=month_start).count()
+
+    return {
+        'total': records.count(),
+        'today': records.filter(created_at__gte=today_start).count(),
+        'this_week': records.filter(created_at__gte=now - timedelta(days=7)).count(),
+        'this_month': this_month,
+        # None means "no data last month", so the template can hide the growth badge
+        'growth': round((this_month - last_month) / last_month * 100, 1) if last_month else None,
+        'recent': records.order_by('-created_at', '-pk')[:3],
+    }
 
 
 # @login_required sends logged-out visitors to settings.LOGIN_URL with ?next=<this page>
