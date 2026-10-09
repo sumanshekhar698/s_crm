@@ -7,7 +7,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from .forms import SignUpForm, AddRecordForm
@@ -46,6 +46,7 @@ def customer_stats(records):
         'this_week': records.filter(created_at__gte=now - timedelta(days=7)).count(),
         'this_month': this_month,
         # None means "no data last month", so the template can hide the growth badge
+        'by_status': {value: records.filter(status=value).count() for value in Record.Status.values},
         'growth': round((this_month - last_month) / last_month * 100, 1) if last_month else None,
         'recent': records.order_by('-created_at', '-pk')[:3],
     }
@@ -67,6 +68,18 @@ def customers(request):
             | Q(city__icontains=query)
         )
 
+    # Count each status within the current search, before the status filter narrows it down
+    status_counts = dict(records.values_list('status').annotate(n=Count('pk')))
+    status_tabs = [('', 'All', sum(status_counts.values()))] + [
+        (value, label, status_counts.get(value, 0)) for value, label in Record.Status.choices
+    ]
+
+    status = request.GET.get('status', '')
+    if status in Record.Status.values:
+        records = records.filter(status=status)
+    else:
+        status = ''
+
     # Only whitelisted keys reach order_by(), so the URL can't sort by arbitrary fields
     sort = request.GET.get('sort', '-created')
     if sort.lstrip('-') not in SORT_FIELDS:
@@ -77,7 +90,13 @@ def customers(request):
     # get_page() handles missing, non-numeric and out-of-range page numbers for us
     page_obj = Paginator(records, PER_PAGE).get_page(request.GET.get('page'))
 
-    return render(request, 'customers/dashboard.html', {'page_obj': page_obj, 'query': query, 'sort': sort})
+    return render(request, 'customers/dashboard.html', {
+        'page_obj': page_obj,
+        'query': query,
+        'sort': sort,
+        'status': status,
+        'status_tabs': status_tabs,
+    })
 
 
 def login_view(request):

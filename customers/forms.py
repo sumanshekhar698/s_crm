@@ -61,7 +61,7 @@ class AddRecordForm(forms.ModelForm):
 
 	class Meta:
 		model = Record
-		fields = ('first_name', 'last_name', 'email', 'phone', 'address', 'city', 'state', 'zipcode')
+		fields = ('first_name', 'last_name', 'email', 'phone', 'address', 'city', 'state', 'zipcode', 'status')
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
@@ -84,6 +84,9 @@ class AddRecordForm(forms.ModelForm):
 				'placeholder': placeholder,
 				'autocomplete': autocomplete,
 			})
+
+		# A <select> uses Bootstrap's form-select class instead of form-control
+		self.fields['status'].widget.attrs['class'] = 'form-select'
 
 	def full_clean(self):
 		super().full_clean()

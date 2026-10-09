@@ -132,6 +132,18 @@ S-CRM | Customer Relationship Management
                             </div>
                         </div>
 
+                        <div class="d-flex flex-wrap gap-2 mb-4 small">
+                            <a href="{% url 'customers_home' %}?status=lead" class="badge rounded-pill bg-primary-subtle text-primary-emphasis text-decoration-none px-3 py-2">
+                                {{ stats.by_status.lead }} Lead{{ stats.by_status.lead|pluralize }}
+                            </a>
+                            <a href="{% url 'customers_home' %}?status=active" class="badge rounded-pill bg-success-subtle text-success-emphasis text-decoration-none px-3 py-2">
+                                {{ stats.by_status.active }} Active
+                            </a>
+                            <a href="{% url 'customers_home' %}?status=inactive" class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis text-decoration-none px-3 py-2">
+                                {{ stats.by_status.inactive }} Inactive
+                            </a>
+                        </div>
+
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <div class="fw-semibold small text-uppercase text-muted">Recent customers</div>
                             <a href="{% url 'customers_home' %}" class="small text-decoration-none">View all</a>
@@ -145,9 +157,9 @@ S-CRM | Customer Relationship Management
                                     <a href="{% url 'record' record.pk %}" class="fw-semibold text-body text-decoration-none">
                                         {{ record.first_name }} {{ record.last_name }}
                                     </a>
-                                    <div class="small text-muted">{{ record.city }}, {{ record.state }}</div>
+                                    <div class="small text-muted">{{ record.city }}, {{ record.state }} &middot; {{ record.created_at|timesince }} ago</div>
                                 </div>
-                                <span class="small text-muted text-nowrap">{{ record.created_at|timesince }} ago</span>
+                                {% include "customers/_status_badge.html" %}
                             </li>
                             {% empty %}
                             <li class="list-group-item px-0 text-muted small">

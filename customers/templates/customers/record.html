@@ -20,8 +20,9 @@
                 <div class="card-header bg-primary-subtle border-0 p-4 d-flex align-items-center gap-3">
                     <i class="bi bi-person-circle display-5 text-primary"></i>
                     <div>
-                        <h2 class="fw-bold mb-0">
+                        <h2 class="fw-bold mb-0 d-flex align-items-center gap-2">
                             {{ customer_record.first_name }} {{ customer_record.last_name }}
+                            <span class="fs-6">{% include "customers/_status_badge.html" with record=customer_record %}</span>
                         </h2>
                         <div class="small text-body-secondary">
                             Customer #{{ customer_record.pk }} &middot; Added {{ customer_record.created_at|date:"M d, Y" }}

@@ -1,0 +1,1 @@
+<span class="badge rounded-pill {% if record.status == 'active' %}bg-success-subtle text-success-emphasis{% elif record.status == 'inactive' %}bg-secondary-subtle text-secondary-emphasis{% else %}bg-primary-subtle text-primary-emphasis{% endif %}">{{ record.get_status_display }}</span>

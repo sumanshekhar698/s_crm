@@ -12,7 +12,7 @@
 
     <div class="row g-3">
         {% for field in form %}
-        <div class="{% if field.name == 'address' %}col-12{% elif field.name == 'city' %}col-sm-5{% elif field.name == 'state' %}col-sm-4{% elif field.name == 'zipcode' %}col-sm-3{% else %}col-sm-6{% endif %}">
+        <div class="{% if field.name == 'address' %}col-12{% elif field.name == 'city' %}col-sm-5{% elif field.name == 'state' %}col-sm-4{% elif field.name == 'zipcode' %}col-sm-3{% elif field.name == 'status' %}col-sm-5{% else %}col-sm-6{% endif %}">
             <label for="{{ field.id_for_label }}" class="form-label">
                 {{ field.label }}
             </label>
