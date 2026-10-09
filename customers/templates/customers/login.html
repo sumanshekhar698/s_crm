@@ -29,10 +29,18 @@
                     </div>
 
 
+                    {% if next %}
+                    <div class="alert alert-warning small d-flex align-items-center gap-2">
+                        <i class="bi bi-lock-fill"></i>
+                        Please log in to continue.
+                    </div>
+                    {% endif %}
+
                     <!-- Login Form -->
-                    <form method="post" action="{% url 'customers_home' %}">
+                    <form method="post" action="{% url 'login' %}">
 
                         {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ next }}">
 
                         <!-- Username -->
                         <div class="mb-3">
